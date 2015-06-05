@@ -1,5 +1,9 @@
+require java
+
 class {
-    'elasticsearch':;
+    'elasticsearch':
+        manage_repo  => true,
+        repo_version => '1.5';
 }
 elasticsearch::instance {
     'es-01':
