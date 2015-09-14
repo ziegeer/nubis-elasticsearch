@@ -17,7 +17,7 @@
       ],
       "ConstraintDescription": "Must specify prod, stage, or sandbox."
     },
-    "KeyName": {
+    "SSHKeyName": {
       "Description": "Existing ssh key to deploy to EC2 instances",
       "Type": "String"
     },
@@ -52,7 +52,7 @@
     "EC2Stack": {
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
-        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubisproject-stacks", { "Ref": "StacksVersion" }, "ec2.template" ] ] },
+        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubis-stacks", { "Ref": "StacksVersion" }, "ec2.template" ] ] },
         "TimeoutInMinutes": "60",
         "Parameters": {
           "StackName": {
@@ -70,8 +70,8 @@
           "AmiId": {
             "Ref": "AmiId"
           },
-          "KeyName": {
-            "Ref": "KeyName"
+          "SSHKeyName": {
+            "Ref": "SSHKeyName"
           },
           "InstanceType": {
             "Fn::FindInMap": [
@@ -87,6 +87,24 @@
               "ELBStack",
               "Outputs.ELB"
             ]
+          },
+          "AutoScalingGroupMinSize": "1",
+          "AutoScalingGroupDesiredCapacity": "1",
+          "AutoScalingGroupMaxSize": "4"
+        }
+      }
+    },
+    "AutoScalingStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubis-stacks", { "Ref": "StacksVersion" }, "autoscaling-cpu.template" ] ] },
+        "TimeoutInMinutes": "60",
+        "Parameters": {
+          "AutoScalingGroup": {
+            "Fn::GetAtt": [
+              "EC2Stack",
+              "Outputs.AutoScalingGroup"
+            ]
           }
         }
       }
@@ -94,7 +112,7 @@
     "ELBStack": {
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
-        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubisproject-stacks", { "Ref": "StacksVersion" }, "elb.template" ] ] },
+        "TemplateURL": { "Fn::Join": [ "/", [ "https://s3.amazonaws.com/nubis-stacks", { "Ref": "StacksVersion" }, "elb.template" ] ] },
         "TimeoutInMinutes": "60",
         "Parameters": {
           "ServiceName": {
